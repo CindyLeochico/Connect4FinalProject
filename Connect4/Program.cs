@@ -15,12 +15,64 @@
 
     public void StartGame()
     {
+        GameView view = new GameView();
+        bool gameRunning = true;
 
+        while (gameRunning)
+        {
+            // Display the current state of the board
+            view.DisplayBoard(board);
+
+            // Announce the current player's turn
+            view.DisplayTurn(currentPlayer);
+
+            // Get the column from the current player
+            int column = currentPlayer.MakeMove(board);
+
+            // Attempt to drop the disc into the board
+            bool moveSuccessful = board.DropDisc(column, currentPlayer.Symbol);
+
+            // If the move is successful, check for a win or draw
+            if (moveSuccessful)
+            {
+                if (board.IsWinningMove(column, currentPlayer.Symbol))
+                {
+                    view.DisplayBoard(board);
+                    view.DisplayWinner(currentPlayer);
+                    gameRunning = false;
+                }
+                else if (board.IsDraw())
+                {
+                    view.DisplayBoard(board);
+                    view.DisplayDraw();
+                    gameRunning = false;
+                }
+                else
+                {
+                    // If the game hasn't been won or drawn, switch players
+                    SwitchPlayer();
+                }
+            }
+            else
+            {
+                // If the move wasn't successful (column full or invalid), prompt again
+                view.DisplayInvalidMove();
+            }
+        }
+
+        // End of game, offer restart or exit
+        RestartOrExitGame();
     }
+
 
     private void SwitchPlayer()
     {
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
+    }
 
+    private void RestartOrExitGame()
+    {
+        // Code to restart or exit the game
     }
 
     private bool CheckGameOver()
@@ -80,6 +132,6 @@ public class GameView
 
     public void DisplayTurn(Player player)
     {
-
+     
     }
 }
