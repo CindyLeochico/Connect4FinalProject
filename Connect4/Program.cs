@@ -72,7 +72,35 @@
 
     private void RestartOrExitGame()
     {
-        // Code to restart or exit the game
+        GameView view = new GameView();
+        view.DisplayRestartPrompt(); // This would prompt the user with a message to restart or exit.
+
+        string input = Console.ReadLine();
+        switch (input)
+        {
+            case "1":
+            case "yes":
+            case "Yes":
+            case "Y":
+            case "y":
+                // Clear the board and reset the game state
+                board.Reset();
+                currentPlayer = player1; // Or randomize starting player
+                StartGame(); // Restart the game
+                break;
+            case "0":
+            case "no":
+            case "No":
+            case "N":
+            case "n":
+                view.DisplayExitMessage(); // This would display a goodbye message.
+                Environment.Exit(0); // Exit the game
+                break;
+            default:
+                view.DisplayInvalidOption();
+                RestartOrExitGame(); // Recursively call itself to handle invalid input
+                break;
+        }
     }
 
     private bool CheckGameOver()
