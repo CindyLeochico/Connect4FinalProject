@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\Desktop\\term 2\\oop\\sourcetree-connect4\\Connect4\\Connect4.csproj",
+      "projectUniqueName": "C:\\Users\\User\\Documents\\Connect4FinalProject\\Connect4\\Connect4.csproj",
       "projectName": "Connect4",
-      "projectPath": "C:\\Users\\User\\Desktop\\term 2\\oop\\sourcetree-connect4\\Connect4\\Connect4.csproj",
+      "projectPath": "C:\\Users\\User\\Documents\\Connect4FinalProject\\Connect4\\Connect4.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\Desktop\\term 2\\oop\\sourcetree-connect4\\Connect4\\obj\\",
+      "outputPath": "C:\\Users\\User\\Documents\\Connect4FinalProject\\Connect4\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
