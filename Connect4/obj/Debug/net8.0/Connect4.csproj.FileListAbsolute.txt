@@ -19,3 +19,11 @@ C:\Users\User\Desktop\term 2\oop\connectfourgame\Connect4\obj\Debug\net8.0\Conne
 C:\Users\User\Desktop\term 2\oop\connectfourgame\Connect4\obj\Debug\net8.0\Connect4.dll
 C:\Users\User\Desktop\term 2\oop\connectfourgame\Connect4\obj\Debug\net8.0\refint\Connect4.dll
 C:\Users\User\Desktop\term 2\oop\connectfourgame\Connect4\obj\Debug\net8.0\Connect4.pdb
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\Connect4.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\Connect4.AssemblyInfoInputs.cache
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\Connect4.AssemblyInfo.cs
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\Connect4.csproj.CoreCompileInputs.cache
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\Connect4.sourcelink.json
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\Connect4.dll
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\refint\Connect4.dll
+C:\Users\Cindy\OneDrive\Desktop\Connect4\Connect4\obj\Debug\net8.0\Connect4.pdb

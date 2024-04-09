@@ -1,239 +1,435 @@
-﻿public class GameController
+﻿namespace ConenctFourGame
 {
-    private Board board;
-    private Player currentPlayer;
-    private HumanPlayer player1;
-    private HumanPlayer player2;
-
-    public GameController()
+    public class Program
     {
-        board = new Board();
-        player1 = new HumanPlayer('X');
-        player2 = new HumanPlayer('O');
-        currentPlayer = player1;
-    }
-
-    public void StartGame()
-    {
-        GameView view = new GameView();
-        bool gameRunning = true;
-
-        while (gameRunning)
+        public static void Main(string[] args)
         {
-            // Display the current state of the board
-            view.DisplayBoard(board);
+            GameController gameController = new GameController();
+            gameController.StartGame();
+        }
+    }
+    public class GameController
+    {
+        private Board board;
+        private Player currentPlayer;
+        private HumanPlayer player1;
+        private HumanPlayer player2;
+        private GameView view;
 
-            // Announce the current player's turn
-            view.DisplayTurn(currentPlayer);
+        public GameController()
+        {
+            board = new Board();
+            player1 = new HumanPlayer('X');
+            player2 = new HumanPlayer('O');
+            currentPlayer = player1;
+            view = new GameView();
+        }
 
-            // Get the column from the current player
-            int column = currentPlayer.MakeMove(board);
+        public void StartGame()
+        {
+            view.DisplayTeamName(); // Display the team name at the start
 
-            // Attempt to drop the disc into the board
-            bool moveSuccessful = board.DropDisc(column, currentPlayer.Symbol);
-
-            // If the move is successful, check for a win or draw
-            if (moveSuccessful)
+            bool gameRunning = true;
+            while (gameRunning)
             {
-                if (board.IsWinningMove(column, currentPlayer.Symbol))
+                // Display the current state of the board
+                view.DisplayBoard(board);
+
+                // Announce the current player's turn
+                view.DisplayTurn(currentPlayer);
+
+                // Get the column choice from the current player and process the move
+                int columnChoice = currentPlayer.MakeMove(board);
+                bool moveSuccessful = board.DropDisc(columnChoice, currentPlayer.Symbol);
+
+                if (moveSuccessful)
                 {
-                    view.DisplayBoard(board);
-                    view.DisplayWinner(currentPlayer);
-                    gameRunning = false;
-                }
-                else if (board.IsDraw())
-                {
-                    view.DisplayBoard(board);
-                    view.DisplayDraw();
-                    gameRunning = false;
+                    // Check for a win or a draw
+                    if (board.IsWinningMove(columnChoice, currentPlayer.Symbol))
+                    {
+                        view.DisplayWinner(currentPlayer);
+                        RestartOrExitGame();
+                        return; // Exit after the RestartOrExitGame() decision
+                    }
+                    else if (board.IsFull())
+                    {
+                        view.DisplayDraw();
+                        RestartOrExitGame();
+                        return; // Exit after the RestartOrExitGame() decision
+                    }
+                    else
+                    {
+                        // Switch the current player if the game is still going
+                        currentPlayer = (currentPlayer == player1) ? player2 : player1;
+                    }
                 }
                 else
                 {
-                    // If the game hasn't been won or drawn, switch players
-                    SwitchPlayer();
+                    // If the move wasn't successful (column full or invalid), prompt again
+                    view.DisplayInvalidMove();
+                    // Note: You might want to adjust the logic to re-prompt within the currentPlayer.MakeMove method or handle it elegantly here
                 }
             }
-            else
+        }
+
+        public void PlayTurn()
+        {
+            bool moveMade = false;
+            while (!moveMade)
             {
-                // If the move wasn't successful (column full or invalid), prompt again
-                view.DisplayInvalidMove();
+                int column = currentPlayer.MakeMove(board); // Get column from player
+
+                if (!board.DropDisc(column, currentPlayer.Symbol))
+                {
+                    view.DisplayInvalidMove(); // Show error message for invalid move
+                    // The loop will continue, prompting the player for a new move
+                }
+                else
+                {
+                    moveMade = true; // Valid move was made, exit the loop
+                    // Additional logic to check for a win or draw could follow here
+                }
+            }
+
+            // After a successful move, you might check for a win or switch players
+        }
+
+        private void SwitchPlayer()
+        {
+            // Switch currentPlayer between player1 and player2
+            currentPlayer = (currentPlayer == player1) ? player2 : player1;
+        }
+
+        private void RestartOrExitGame()
+        {
+            view.DisplayRestartPrompt(); // This would prompt the user with a message to restart or exit.
+
+            string input = Console.ReadLine()!;
+            switch (input)
+            {
+                case "1":
+                case "yes":
+                case "Yes":
+                case "Y":
+                case "y":
+                    // Clear the board and reset the game state
+                    board.Reset();
+                    currentPlayer = player1; // Or randomize starting player
+                    StartGame(); // Restart the game
+                    break;
+                case "0":
+                case "no":
+                case "No":
+                case "N":
+                case "n":
+                    view.DisplayExitMessage(); // This would display a goodbye message.
+                    Environment.Exit(0); // Exit the game
+                    break;
+                default:
+                    view.DisplayInvalidMove();
+                    RestartOrExitGame(); // Recursively call itself to handle invalid input
+                    break;
             }
         }
 
-        // End of game, offer restart or exit
-        RestartOrExitGame();
-    }
-
-
-    private void SwitchPlayer()
-    {
-        currentPlayer = (currentPlayer == player1) ? player2 : player1;
-    }
-
-    private void RestartOrExitGame()
-    {
-        GameView view = new GameView();
-        view.DisplayRestartPrompt(); // This would prompt the user with a message to restart or exit.
-
-        string input = Console.ReadLine();
-        switch (input)
+        private bool CheckGameOver()
         {
-            case "1":
-            case "yes":
-            case "Yes":
-            case "Y":
-            case "y":
-                // Clear the board and reset the game state
-                board.Reset();
-                currentPlayer = player1; // Or randomize starting player
-                StartGame(); // Restart the game
-                break;
-            case "0":
-            case "no":
-            case "No":
-            case "N":
-            case "n":
-                view.DisplayExitMessage(); // This would display a goodbye message.
-                Environment.Exit(0); // Exit the game
-                break;
-            default:
-                view.DisplayInvalidOption();
-                RestartOrExitGame(); // Recursively call itself to handle invalid input
-                break;
+            // Check all win conditions for the current player
+            if (board.HasWon(currentPlayer.Symbol))
+            {
+                view.DisplayWinner(currentPlayer);
+                return true;
+            }
+
+            // Check if the board is full and therefore the game is a draw
+            if (board.IsFull())
+            {
+                view.DisplayDraw();
+                return true;
+            }
+
+            // If neither condition is met, the game is not over
+            return false;
         }
     }
 
-    private bool CheckGameOver()
+    public class Board
     {
-        // Check all win conditions for the current player
-        if (board.HasWon(currentPlayer.Symbol))
+        private char[,] grid;
+        public static readonly int Rows = 6;
+        public static readonly int Columns = 7;
+
+        public Board()
         {
-            GameView.DisplayWinner(currentPlayer);
-            return true;
-        }
-
-        // Check if the board is full and therefore the game is a draw
-        if (board.IsFull())
-        {
-            GameView.DisplayDraw();
-            return true;
-        }
-
-        // If neither condition is met, the game is not over
-        return false;
-    }
-}
-
-public class Board
-{
-    private char[,] grid;
-
-    public Board()
-    {
-        grid = new char[6, 7];
-    }
-
-    public bool DropDisc(int column, char symbol)
-    {
-        return true;
-    }
-
-    public bool IsWinningMove(int column, char symbol)
-    {
-        return false;
-    }
-
-    public bool HasWon(char symbol)
-    {
-        // Check horizontal, vertical, and diagonal lines for a win
-        return CheckHorizontalWin(symbol) || CheckVerticalWin(symbol) || CheckDiagonalWin(symbol);
-    }
-
-    public bool IsFull()
-    {
-        // Check if all columns in the top row (the entry row for discs) are filled
-        for (int col = 0; col < grid.GetLength(1); col++)
-        {
-            if (grid[0, col] == '\0')
-            { // Assuming the default value of '\0' for empty cells
-                return false; // Found an empty space, so the board is not full
+            grid = new char[Rows, Columns];
+            // Initialize the grid with an empty value, assuming '\0' represents an empty cell
+            for (int i = 0; i < Rows; i++)
+            {
+                for (int j = 0; j < Columns; j++)
+                {
+                    grid[i, j] = '\0';
+                }
             }
         }
-        return true; // No empty spaces found in the top row, so the board is full
+
+        public bool DropDisc(int column, char symbol)
+        {
+            if (column < 0 || column >= Columns)
+            {
+                return false; // Column out of bounds
+            }
+
+            for (int row = Rows - 1; row >= 0; row--)
+            {
+                if (grid[row, column] == '\0')
+                {
+                    grid[row, column] = symbol;
+                    return true; // Successfully placed the disc
+                }
+            }
+
+            return false; // The column is full, disc not placed
+        }
+
+        public bool IsWinningMove(int column, char symbol)
+        {
+            // Find the row index of the topmost disc in the column
+            int row = -1;
+            for (int i = 0; i < Rows; i++)
+            {
+                if (grid[i, column] == symbol)
+                {
+                    row = i;
+                    break;
+                }
+            }
+
+            // If no disc is found in the column for the symbol, return false
+            if (row == -1) return false;
+
+            // Check for a horizontal, vertical, or diagonal win starting from the position (row, column)
+            return CheckHorizontalWin(row, column, symbol) ||
+                   CheckVerticalWin(column, symbol) ||
+                   CheckDiagonalWin(row, column, symbol);
+        }
+
+        private int FindRowForColumn(int column, char symbol)
+        {
+            for (int i = 0; i < Rows; i++)
+            {
+                if (grid[i, column] == symbol)
+                {
+                    return i;
+                }
+            }
+            return -1; // No disc found in this column for the symbol, or the column is out of bounds
+        }
+
+        private bool CheckVerticalWin(int startColumn, char symbol)
+        {
+            // Starting from the bottom of the column where the last disc was placed
+            // and moving up, check if there are 4 in a row.
+            int consecutiveCount = 0;
+            for (int row = Rows - 1; row >= 0; row--)
+            {
+                if (grid[row, startColumn] == symbol)
+                {
+                    consecutiveCount++;
+                    if (consecutiveCount == 4)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    consecutiveCount = 0; // Reset the count if the sequence is broken
+                }
+            }
+            return false;
+        }
+
+        private bool CheckHorizontalWin(int row, int column, char symbol)
+        {
+            // Check left and right from the column
+            int count = 0;
+            for (int i = column; i >= 0 && grid[row, i] == symbol; i--) count++;
+            for (int i = column + 1; i < Columns && grid[row, i] == symbol; i++) count++;
+            return count >= 4;
+        }
+
+        private bool CheckDiagonalWin(int row, int column, char symbol)
+        {
+            // Check for a diagonal win in both directions
+            int count = 0;
+            // Check diagonal (bottom-left to top-right)
+            for (int i = 0; i < 4; i++)
+            {
+                if (row - i < 0 || column + i >= Columns || grid[row - i, column + i] != symbol) break;
+                count++;
+            }
+            if (count >= 4) return true;
+
+            count = 0;
+            // Check diagonal (top-left to bottom-right)
+            for (int i = 0; i < 4; i++)
+            {
+                if (row + i >= Rows || column + i >= Columns || grid[row + i, column + i] != symbol) break;
+                count++;
+            }
+            return count >= 4;
+        }
+
+        public bool HasWon(char symbol)
+        {
+            // Check horizontal lines for a win
+            for (int row = 0; row < Rows; row++)
+            {
+                for (int col = 0; col <= Columns - 4; col++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row, col + 1] == symbol &&
+                        grid[row, col + 2] == symbol &&
+                        grid[row, col + 3] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check vertical lines for a win
+            for (int col = 0; col < Columns; col++)
+            {
+                for (int row = 0; row <= Rows - 4; row++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row + 1, col] == symbol &&
+                        grid[row + 2, col] == symbol &&
+                        grid[row + 3, col] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check diagonal lines (bottom-left to top-right) for a win
+            for (int row = 3; row < Rows; row++)
+            {
+                for (int col = 0; col <= Columns - 4; col++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row - 1, col + 1] == symbol &&
+                        grid[row - 2, col + 2] == symbol &&
+                        grid[row - 3, col + 3] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check diagonal lines (top-left to bottom-right) for a win
+            for (int row = 0; row <= Rows - 4; row++)
+            {
+                for (int col = 0; col <= Columns - 4; col++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row + 1, col + 1] == symbol &&
+                        grid[row + 2, col + 2] == symbol &&
+                        grid[row + 3, col + 3] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public bool IsFull()
+        {
+            // Check if all columns in the top row (the entry row for discs) are filled
+            for (int col = 0; col < grid.GetLength(1); col++)
+            {
+                if (grid[0, col] == '\0')
+                { // Assuming the default value of '\0' for empty cells
+                    return false; // Found an empty space, so the board is not full
+                }
+            }
+            return true; // No empty spaces found in the top row, so the board is full
+        }
+
+        private bool CheckHorizontalWin(char symbol)
+        {
+            // Implement logic to check for 4 in a row horizontally
+        }
+
+        private bool CheckVerticalWin(char symbol)
+        {
+            // Implement logic to check for 4 in a row vertically
+        }
+
+        private bool CheckDiagonalWin(char symbol)
+        {
+            // Implement logic to check for 4 in a row diagonally
+        }
     }
 
-    private bool CheckHorizontalWin(char symbol)
+    public abstract class Player
     {
-        // Implement logic to check for 4 in a row horizontally
+        protected char symbol;
+
+        protected Player(char symbol)
+        {
+            this.symbol = symbol;
+        }
+
+        public abstract int MakeMove(Board board);
     }
 
-    private bool CheckVerticalWin(char symbol)
+    public class HumanPlayer : Player
     {
-        // Implement logic to check for 4 in a row vertically
+        public HumanPlayer(char symbol) : base(symbol) { }
+
+        public override int MakeMove(Board board)
+        {
+            return 0;
+        }
     }
 
-    private bool CheckDiagonalWin(char symbol)
+    public class GameView
     {
-        // Implement logic to check for 4 in a row diagonally
-    }
-}
+        public void DisplayBoard(Board board)
+        {
 
-public abstract class Player
-{
-    protected char symbol;
+        }
 
-    protected Player(char symbol)
-    {
-        this.symbol = symbol;
-    }
+        public void DisplayTurn(Player player)
+        {
 
-    public abstract int MakeMove(Board board);
-}
+        }
 
-public class HumanPlayer : Player
-{
-    public HumanPlayer(char symbol) : base(symbol) { }
+        public void DisplayRestartPrompt()
+        {
+            Console.WriteLine("Game over. Would you like to play again? (Yes/1 or No/0)");
+        }
 
-    public override int MakeMove(Board board)
-    {
-        return 0;
-    }
-}
+        public void DisplayExitMessage()
+        {
+            Console.WriteLine("Thank you for playing! Goodbye.");
+        }
 
-public class GameView
-{
-    public void DisplayBoard(Board board)
-    {
+        public void DisplayInvalidOption()
+        {
+            Console.WriteLine("Invalid option, please try again.");
+        }
 
-    }
+        public static void DisplayWinner(Player player)
+        {
+            Console.WriteLine($"{player.Name} has won the game!");
+        }
 
-    public void DisplayTurn(Player player)
-    {
-     
-    }
-
-    public void DisplayRestartPrompt()
-    {
-        Console.WriteLine("Game over. Would you like to play again? (Yes/1 or No/0)");
-    }
-
-    public void DisplayExitMessage()
-    {
-        Console.WriteLine("Thank you for playing! Goodbye.");
-    }
-
-    public void DisplayInvalidOption()
-    {
-        Console.WriteLine("Invalid option, please try again.");
-    }
-
-    public static void DisplayWinner(Player player)
-    {
-        Console.WriteLine($"{player.Name} has won the game!");
-    }
-
-    public static void DisplayDraw()
-    {
-        Console.WriteLine("The game is a draw. No more moves possible.");
+        public static void DisplayDraw()
+        {
+            Console.WriteLine("The game is a draw. No more moves possible.");
+        }
     }
 }
