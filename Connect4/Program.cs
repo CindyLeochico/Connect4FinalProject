@@ -359,17 +359,93 @@
 
         private bool CheckHorizontalWin(char symbol)
         {
-            // Implement logic to check for 4 in a row horizontally
+            for (int row = 0; row < Rows; row++)
+            {
+                for (int col = 0; col < Columns - 3; col++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row, col + 1] == symbol &&
+                        grid[row, col + 2] == symbol &&
+                        grid[row, col + 3] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private bool CheckVerticalWin(char symbol)
         {
-            // Implement logic to check for 4 in a row vertically
+            for (int col = 0; col < Columns; col++)
+            {
+                for (int row = 0; row < Rows - 3; row++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row + 1, col] == symbol &&
+                        grid[row + 2, col] == symbol &&
+                        grid[row + 3, col] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private bool CheckDiagonalWin(char symbol)
         {
-            // Implement logic to check for 4 in a row diagonally
+            // Check for diagonals that go from the top-left to the bottom-right
+            for (int row = 0; row < Rows - 3; row++)
+            {
+                for (int col = 0; col < Columns - 3; col++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row + 1, col + 1] == symbol &&
+                        grid[row + 2, col + 2] == symbol &&
+                        grid[row + 3, col + 3] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check for diagonals that go from the bottom-left to the top-right
+            for (int row = 3; row < Rows; row++)
+            {
+                for (int col = 0; col < Columns - 3; col++)
+                {
+                    if (grid[row, col] == symbol &&
+                        grid[row - 1, col + 1] == symbol &&
+                        grid[row - 2, col + 2] == symbol &&
+                        grid[row - 3, col + 3] == symbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool CanPlaceDisc(int column)
+        {
+            return grid[0, column] == '\0';
+        }
+
+        public char GetCell(int row, int col)
+        {
+            return grid[row, col];
+        }
+
+        public void Reset()
+        {
+            for (int i = 0; i < Rows; i++)
+            {
+                for (int j = 0; j < Columns; j++)
+                {
+                    grid[i, j] = '\0'; // Assuming '\0' represents an empty cell
+                }
+            }
         }
     }
 
@@ -391,7 +467,34 @@
 
         public override int MakeMove(Board board)
         {
-            return 0;
+            bool validInput = false;
+            int column = -1;
+
+            while (!validInput)
+            {
+                Console.WriteLine($"Player {symbol}, enter your column choice (1-{Board.Columns}): ");
+                string input = Console.ReadLine()!;
+
+                if (int.TryParse(input, out column) && column >= 1 && column <= Board.Columns)
+                {
+                    // Adjust for zero-based index used in the board array
+                    column--;
+                    if (board.CanPlaceDisc(column))
+                    {
+                        validInput = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("That column is full. Please try a different column.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input. Please enter a number corresponding to a column.");
+                }
+            }
+
+            return column;
         }
     }
 
