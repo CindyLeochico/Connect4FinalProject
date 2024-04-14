@@ -4,41 +4,41 @@
     {
         public static void Main(string[] args)
         {
+            // Create a new game controller instance and start the game.
             GameController gameController = new GameController();
             gameController.StartGame();
         }
     }
     public class GameController
     {
-        private Board board;
-        private Player currentPlayer;
-        private HumanPlayer player1;
-        private HumanPlayer player2;
-        private GameView view;
+        private Board board; // Manages the game board's state
+        private Player currentPlayer; // Tracks the current player for turn management
+        private HumanPlayer player1; // Represents player 1 using 'X' as their symbol
+        private HumanPlayer player2; // Represents player 2 using 'O' as their symbol
+        private GameView view; // Manages game-related displays and user interaction
 
         public GameController()
         {
+            // Initialize the game components and set the starting player.
             board = new Board();
             player1 = new HumanPlayer('X');
             player2 = new HumanPlayer('O');
-            currentPlayer = player1;
+            currentPlayer = player1; // Start the game with player 1
             view = new GameView();
         }
 
         public void StartGame()
         {
-            view.DisplayTeamName(); // Display the team name at the start
+            view.DisplayTeamName(); // Introduce the game and the team behind it
 
             bool gameRunning = true;
-            while (gameRunning)
+            while (gameRunning) // Main game loop to handle turns and game state
             {
-                // Display the current state of the board
-                view.DisplayBoard(board);
+                
+                view.DisplayBoard(board); // Display the current state of the board              
+                view.DisplayTurn(currentPlayer); // Announce the current player's turn
 
-                // Announce the current player's turn
-                view.DisplayTurn(currentPlayer);
-
-                // Get the column choice from the current player and process the move
+                // Execute a turn and update the board
                 int columnChoice = currentPlayer.MakeMove(board);
                 bool moveSuccessful = board.DropDisc(columnChoice, currentPlayer.Symbol);
 
@@ -47,27 +47,24 @@
                     // Check for a win or a draw
                     if (board.IsWinningMove(columnChoice, currentPlayer.Symbol))
                     {
-                        view.DisplayWinner(currentPlayer);
-                        RestartOrExitGame();
-                        return; // Exit after the RestartOrExitGame() decision
+                        view.DisplayWinner(currentPlayer); // Announce the winner
+                        RestartOrExitGame(); // Offer a restart or exit option
+                        return;
                     }
                     else if (board.IsFull())
                     {
-                        view.DisplayDraw();
-                        RestartOrExitGame();
-                        return; // Exit after the RestartOrExitGame() decision
+                        view.DisplayDraw(); // Announce a draw if the board is full
+                        RestartOrExitGame(); // Offer a restart or exit option
+                        return; 
                     }
                     else
-                    {
-                        // Switch the current player if the game is still going
-                        currentPlayer = (currentPlayer == player1) ? player2 : player1;
+                    {                    
+                        currentPlayer = (currentPlayer == player1) ? player2 : player1; // Switch the current player if the game is still going
                     }
                 }
                 else
                 {
-                    // If the move wasn't successful (column full or invalid), prompt again
-                    view.DisplayInvalidMove();
-                    // Note: You might want to adjust the logic to re-prompt within the currentPlayer.MakeMove method or handle it elegantly here
+                    view.DisplayInvalidMove(); // Prompt for a valid move if the attempted move is invalid
                 }
             }
         }
@@ -87,50 +84,45 @@
                 else
                 {
                     moveMade = true; // Valid move was made, exit the loop
-                    // Additional logic to check for a win or draw could follow here
                 }
             }
-
-            // After a successful move, you might check for a win or switch players
         }
 
         private void SwitchPlayer()
         {
-            // Switch currentPlayer between player1 and player2
-            currentPlayer = (currentPlayer == player1) ? player2 : player1;
+            currentPlayer = (currentPlayer == player1) ? player2 : player1; // Toggle between player 1 and player 2 to switch turns.
         }
 
-        private void RestartOrExitGame()
-        {
-            view.DisplayRestartPrompt(); // This would prompt the user with a message to restart or exit.
+    private void RestartOrExitGame() {
 
-            string input = Console.ReadLine()!;
-            switch (input)
-            {
-                case "1":
-                case "yes":
-                case "Yes":
-                case "Y":
-                case "y":
-                    // Clear the board and reset the game state
-                    board.Reset();
-                    currentPlayer = player1; // Or randomize starting player
-                    StartGame(); // Restart the game
-                    break;
-                case "0":
-                case "no":
-                case "No":
-                case "N":
-                case "n":
-                    view.DisplayExitMessage(); // This would display a goodbye message.
-                    Environment.Exit(0); // Exit the game
-                    break;
-                default:
-                    view.DisplayInvalidMove();
-                    RestartOrExitGame(); // Recursively call itself to handle invalid input
-                    break;
-            }
+        // Prompt the user to decide whether to restart the game or exit.
+        view.DisplayRestartPrompt();
+        string input = Console.ReadLine()!;
+        switch (input) {
+            case "1":
+            case "yes":
+            case "Yes":
+            case "Y":
+            case "y":
+                // Clear the board and reset the game state
+                board.Reset();
+                currentPlayer = player1;
+                StartGame(); // Restart the game
+                break;
+            case "0":
+            case "no":
+            case "No":
+            case "N":
+            case "n":
+                view.DisplayExitMessage(); // This would display a goodbye message.
+                Environment.Exit(0); // Exit the game
+                break;
+            default:
+                view.DisplayInvalidMove();
+                RestartOrExitGame(); // Recursively call itself to handle invalid input
+                break;
         }
+    }
 
         private bool CheckGameOver()
         {
@@ -151,6 +143,7 @@
             // If neither condition is met, the game is not over
             return false;
         }
+
     }
 
     public class Board
@@ -162,7 +155,7 @@
         public Board()
         {
             grid = new char[Rows, Columns];
-            // Initialize the grid with an empty value, assuming '\0' represents an empty cell
+            // Initialize the grid with an empty value
             for (int i = 0; i < Rows; i++)
             {
                 for (int j = 0; j < Columns; j++)
@@ -172,6 +165,7 @@
             }
         }
 
+        // Attempt to drop a disc into the specified column
         public bool DropDisc(int column, char symbol)
         {
             if (column < 0 || column >= Columns)
@@ -190,6 +184,7 @@
 
             return false; // The column is full, disc not placed
         }
+
 
         public bool IsWinningMove(int column, char symbol)
         {
@@ -212,6 +207,7 @@
                    CheckVerticalWin(column, symbol) ||
                    CheckDiagonalWin(row, column, symbol);
         }
+
 
         private int FindRowForColumn(int column, char symbol)
         {
@@ -344,13 +340,14 @@
             return false;
         }
 
+
         public bool IsFull()
         {
             // Check if all columns in the top row (the entry row for discs) are filled
             for (int col = 0; col < grid.GetLength(1); col++)
             {
                 if (grid[0, col] == '\0')
-                { // Assuming the default value of '\0' for empty cells
+                {
                     return false; // Found an empty space, so the board is not full
                 }
             }
@@ -359,6 +356,7 @@
 
         private bool CheckHorizontalWin(char symbol)
         {
+            // Loop through each row of the game board
             for (int row = 0; row < Rows; row++)
             {
                 for (int col = 0; col < Columns - 3; col++)
@@ -377,6 +375,7 @@
 
         private bool CheckVerticalWin(char symbol)
         {
+            // Loop through each column of the board. The outer loop iterates over each column to check for vertical wins.
             for (int col = 0; col < Columns; col++)
             {
                 for (int row = 0; row < Rows - 3; row++)
@@ -429,21 +428,24 @@
 
         public bool CanPlaceDisc(int column)
         {
+            // Check if a disc can be placed in the specified column.
             return grid[0, column] == '\0';
         }
 
         public char GetCell(int row, int col)
         {
+            // Retrieve the symbol from a specific cell in the grid.
             return grid[row, col];
         }
 
         public void Reset()
         {
+            // Iterate over each row of the grid
             for (int i = 0; i < Rows; i++)
             {
                 for (int j = 0; j < Columns; j++)
                 {
-                    grid[i, j] = '\0'; // Assuming '\0' represents an empty cell
+                    grid[i, j] = '\0';
                 }
             }
         }
@@ -451,6 +453,7 @@
 
     public abstract class Player
     {
+        // Protected member 'symbol' holds the character that represents the player's discs on the board.
         protected char symbol;
 
         protected Player(char symbol)
@@ -458,11 +461,18 @@
             this.symbol = symbol;
         }
 
+        public char Symbol
+        {
+            get { return symbol; }
+        }
+
         public abstract int MakeMove(Board board);
     }
 
+    // HumanPlayer class inherits from Player, focusing on human-specific interactions for making moves.
     public class HumanPlayer : Player
     {
+        // Constructor that calls the base Player class constructor with a symbol for the human player ('X' or 'O').
         public HumanPlayer(char symbol) : base(symbol) { }
 
         public override int MakeMove(Board board)
@@ -476,8 +486,7 @@
                 string input = Console.ReadLine()!;
 
                 if (int.TryParse(input, out column) && column >= 1 && column <= Board.Columns)
-                {
-                    // Adjust for zero-based index used in the board array
+                {        
                     column--;
                     if (board.CanPlaceDisc(column))
                     {
@@ -500,39 +509,65 @@
 
     public class GameView
     {
+        // Display initial welcome message and team information at the start of the game.
+        public void DisplayTeamName()
+        {
+            Console.WriteLine("Welcome to our Connect Four Game! (Object-Oriented Program (OOP))");
+            Console.WriteLine("Developed by: Team Fourward Thinkers (Johnson Benedict Corpus, Cindy April Leochico)\n");
+        }
+
+        // Display the current state of the game board to the console.
         public void DisplayBoard(Board board)
         {
-
+            for (int row = 0; row < Board.Rows; row++)
+            {
+                for (int col = 0; col < Board.Columns; col++)
+                {
+                    char symbol = board.GetCell(row, col);
+                    Console.Write(symbol == '\0' ? "." : symbol.ToString());
+                    Console.Write(" ");
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine("1 2 3 4 5 6 7");
+            Console.WriteLine();
         }
 
-        public void DisplayTurn(Player player)
+        // Display whose turn it is in the game.
+        public void DisplayTurn(Player currentPlayer)
         {
-
+            Console.WriteLine($"It is Player {currentPlayer.Symbol}'s turn.");
         }
 
+        // Prompt for game restart or exit after a game ends.
         public void DisplayRestartPrompt()
         {
-            Console.WriteLine("Game over. Would you like to play again? (Yes/1 or No/0)");
+            Console.WriteLine("Game over. Would you like to play again? Press (Y/1 or N/0)");
         }
 
+        // Display a message thanking the player when they choose to exit the game.
         public void DisplayExitMessage()
         {
-            Console.WriteLine("Thank you for playing! Goodbye.");
+            Console.WriteLine("Thank you for playing! Bye.");
         }
 
-        public void DisplayInvalidOption()
+        // Display a message when an invalid move is attempted.
+        public void DisplayInvalidMove()
         {
-            Console.WriteLine("Invalid option, please try again.");
+            Console.WriteLine("Invalid move. Please try again.");
         }
 
-        public static void DisplayWinner(Player player)
+        // Announce the winner of the game.
+        public void DisplayWinner(Player currentPlayer)
         {
-            Console.WriteLine($"{player.Name} has won the game!");
+            Console.WriteLine($"Congratulations! Player {currentPlayer.Symbol} has won the game!");
         }
 
-        public static void DisplayDraw()
+        // Inform both players that the game has ended in a draw.
+        public void DisplayDraw()
         {
-            Console.WriteLine("The game is a draw. No more moves possible.");
+            Console.WriteLine("The game is a draw. There are no more moves possible.");
         }
     }
 }
+
